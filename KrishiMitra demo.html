@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KrishiMitra demo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hind:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#eef3ea; --panel:#ffffff; --ink:#18241b; --muted:#566557; --line:#cfdac9;
+  --leaf:#1f6b3a; --leaf-soft:#e1f1e5; --warn:#8a5a00; --warn-soft:#fff1d6; --bad:#a4281d; --bad-soft:#fde8e5;
+  --bar-bg:#d9e2d5; --focus:#0b57d0;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#101a13; --panel:#18241b; --ink:#e8f0e6; --muted:#a2b3a3; --line:#2c3d30;
+    --leaf:#6fd08b; --leaf-soft:#193323; --warn:#f0c15a; --warn-soft:#352a10; --bad:#ff9d92; --bad-soft:#3a1c18;
+    --bar-bg:#2a3a2e; --focus:#8ab4f8;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#101a13; --panel:#18241b; --ink:#e8f0e6; --muted:#a2b3a3; --line:#2c3d30;
+  --leaf:#6fd08b; --leaf-soft:#193323; --warn:#f0c15a; --warn-soft:#352a10; --bad:#ff9d92; --bad-soft:#3a1c18;
+  --bar-bg:#2a3a2e; --focus:#8ab4f8;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Hind","Noto Sans Devanagari",system-ui,sans-serif;font-size:17px;line-height:1.5}
+main{max-width:980px;margin:0 auto;padding:20px 16px 40px}
+header h1{margin:0;font-size:34px;font-weight:700;color:var(--leaf);letter-spacing:-.01em}
+header p{margin:4px 0 0;color:var(--muted);max-width:56ch}
+.banner{margin:14px 0;padding:10px 14px;border-radius:10px;background:var(--warn-soft);color:var(--warn);font-size:15px;border-left:5px solid var(--warn)}
+.langs{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}
+.langs button{font:inherit;font-weight:600;padding:8px 16px;border-radius:999px;border:2px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+.langs button[aria-pressed="true"]{background:var(--leaf);border-color:var(--leaf);color:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .langs button[aria-pressed="true"]{color:#0c1a10}}
+button:focus-visible,input:focus-visible,label:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:20px;align-items:start}
+@media (max-width:760px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+.panel h2{margin:0 0 10px;font-size:19px}
+.samples{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.samples button{padding:0;border:2px solid var(--line);border-radius:10px;background:var(--bg);cursor:pointer;overflow:hidden;aspect-ratio:1}
+.samples button[aria-pressed="true"]{border-color:var(--leaf)}
+.samples canvas{width:100%;height:100%;display:block}
+.hint{font-size:14px;color:var(--muted);margin:8px 0 0}
+.preview{margin-top:14px;border-radius:12px;overflow:hidden;background:#26323a;aspect-ratio:1;display:grid;place-items:center}
+.preview canvas{width:100%;height:100%;display:block}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.file{display:inline-block;padding:9px 14px;border:2px dashed var(--line);border-radius:10px;cursor:pointer;font-weight:600}
+.file input{position:absolute;opacity:0;width:1px;height:1px}
+.primary{font:inherit;font-weight:700;font-size:18px;padding:12px 22px;border-radius:12px;border:0;background:var(--leaf);color:#fff;cursor:pointer}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .primary{color:#0c1a10}}
+.chk{display:flex;gap:8px;align-items:center;font-size:15px;color:var(--muted)}
+.card{border-radius:12px;padding:14px 16px;margin:0 0 10px;border:2px solid var(--line);background:var(--panel)}
+.card.ok{background:var(--leaf-soft);border-color:var(--leaf)}
+.card.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--warn)}
+.card.note{font-size:14px;color:var(--muted)}
+.small{font-size:14px;color:var(--muted)}
+.dx{font-size:26px;font-weight:700;color:var(--leaf);line-height:1.2}
+.bar{height:14px;border-radius:8px;background:var(--bar-bg);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--leaf);width:0;transition:width .5s ease}
+.card ul{margin:6px 0 0 20px;padding:0}.card li{margin:4px 0}
+.empty{color:var(--muted);padding:30px 6px;text-align:center}
+details{margin-top:12px;font-size:14px;color:var(--muted)}
+details summary{cursor:pointer}
+.sig{display:grid;grid-template-columns:auto 1fr auto;gap:4px 10px;margin-top:8px;align-items:center}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>🌿 KrishiMitra</h1>
+    <p id="sub"></p>
+  </header>
+
+  <div class="banner" id="banner"></div>
+
+  <div class="langs" role="group" aria-label="Language">
+    <button data-l="en" aria-pressed="true">English</button>
+    <button data-l="hi" aria-pressed="false">हिन्दी</button>
+    <button data-l="mr" aria-pressed="false">मराठी</button>
+  </div>
+
+  <div class="grid">
+    <section class="panel">
+      <h2 id="h-pick"></h2>
+      <div class="samples" id="samples"></div>
+      <p class="hint" id="hint"></p>
+      <div class="preview"><canvas id="view" width="320" height="320"></canvas></div>
+      <div class="row">
+        <label class="file"><span id="up"></span><input type="file" id="file" accept="image/*"></label>
+        <label class="chk"><input type="checkbox" id="speak"><span id="speaklbl"></span></label>
+      </div>
+      <div class="row"><button class="primary" id="go"></button></div>
+    </section>
+
+    <section class="panel" aria-live="polite">
+      <h2 id="h-res"></h2>
+      <div id="result"></div>
+    </section>
+  </div>
+</main>
+
+<script>
+const CONF_THRESHOLD = 60;
+
+const UI = {
+  en:{sub:"Photograph a leaf. Get a likely diagnosis and what to do next.",
+      banner:"Demo mode: there is no trained model here. The page reads leaf colours (green, yellow, brown spots, white powder) to make its guess. Your real app uses a trained model instead.",
+      pick:"1. Choose a leaf",hint:"Tap a sample leaf, or upload your own photo.",up:"Upload photo",speak:"Read the advice aloud",
+      btn:"Check this leaf",res:"2. Result",empty:"Pick a leaf and press “Check this leaf”.",noimg:"Choose or upload a leaf photo first.",
+      noleaf:"No leaf found in this photo. Hold the camera close to one leaf in good light.",
+      unsure:"Not sure ({p}%)",tip:"Try a clearer, closer photo of one leaf in daylight.",likely:"Most likely",sure:"Confidence",
+      sym:"What you may see",cure:"What to do",other:"Other possibilities",contact:"Ask an expert",
+      expert:"Kisan Call Centre: 1800-180-1551 (toll-free), or your nearest Krishi Vigyan Kendra.",
+      warn:"This is a first guess from a photo. Confirm with an agriculture expert before spraying.",
+      sig:"What the page measured",sg:"Green",sy:"Yellow",ss:"Brown / dark spots",sw:"White powder",
+      acc:"Colour-based demo estimate"},
+  hi:{sub:"पत्ती की फोटो लें। संभावित रोग और उपाय जानें।",
+      banner:"डेमो मोड: यहाँ कोई प्रशिक्षित मॉडल नहीं है। पेज पत्ती के रंग (हरा, पीला, भूरे धब्बे, सफेद पाउडर) देखकर अनुमान लगाता है। आपका असली ऐप प्रशिक्षित मॉडल इस्तेमाल करता है।",
+      pick:"1. पत्ती चुनें",hint:"नमूना पत्ती पर टैप करें या अपनी फोटो डालें।",up:"फोटो डालें",speak:"सलाह बोलकर सुनाएँ",
+      btn:"पत्ती जाँचें",res:"2. नतीजा",empty:"पत्ती चुनें और “पत्ती जाँचें” दबाएँ।",noimg:"पहले पत्ती की फोटो चुनें या डालें।",
+      noleaf:"इस फोटो में पत्ती नहीं दिखी। अच्छी रोशनी में एक पत्ती के पास से फोटो लें।",
+      unsure:"पक्का नहीं ({p}%)",tip:"दिन की रोशनी में एक पत्ती की साफ़ और पास की फोटो लें।",likely:"सबसे संभावित",sure:"भरोसा",
+      sym:"क्या दिख सकता है",cure:"क्या करें",other:"अन्य संभावनाएँ",contact:"विशेषज्ञ से पूछें",
+      expert:"किसान कॉल सेंटर: 1800-180-1551 (टोल-फ्री), या नज़दीकी कृषि विज्ञान केंद्र।",
+      warn:"यह फोटो से लगाया गया पहला अनुमान है। छिड़काव से पहले कृषि विशेषज्ञ से पुष्टि करें।",
+      sig:"पेज ने क्या मापा",sg:"हरा",sy:"पीला",ss:"भूरे / काले धब्बे",sw:"सफेद पाउडर",
+      acc:"रंग पर आधारित डेमो अनुमान"},
+  mr:{sub:"पानाचा फोटो घ्या. संभाव्य रोग आणि उपाय जाणून घ्या.",
+      banner:"डेमो मोड: येथे प्रशिक्षित मॉडेल नाही. पान किती हिरवे, पिवळे, तपकिरी ठिपके किंवा पांढरी भुकटी आहे हे पाहून पेज अंदाज लावते. तुमचे खरे ॲप प्रशिक्षित मॉडेल वापरते.",
+      pick:"१. पान निवडा",hint:"नमुना पानावर टॅप करा किंवा स्वतःचा फोटो अपलोड करा.",up:"फोटो अपलोड करा",speak:"सल्ला मोठ्याने वाचा",
+      btn:"पान तपासा",res:"२. निकाल",empty:"पान निवडा आणि “पान तपासा” दाबा.",noimg:"आधी पानाचा फोटो निवडा किंवा अपलोड करा.",
+      noleaf:"या फोटोत पान दिसले नाही. चांगल्या प्रकाशात एका पानाच्या जवळून फोटो घ्या.",
+      unsure:"खात्री नाही ({p}%)",tip:"दिवसाच्या प्रकाशात एका पानाचा स्पष्ट आणि जवळचा फोटो घ्या.",likely:"सर्वात शक्य",sure:"खात्री",
+      sym:"काय दिसू शकते",cure:"काय करावे",other:"इतर शक्यता",contact:"तज्ञांना विचारा",
+      expert:"किसान कॉल सेंटर: 1800-180-1551 (टोल-फ्री), किंवा जवळचे कृषी विज्ञान केंद्र.",
+      warn:"हा फोटोवरून काढलेला पहिला अंदाज आहे. फवारणीपूर्वी कृषी तज्ञांकडून खात्री करा.",
+      sig:"पेजने काय मोजले",sg:"हिरवा",sy:"पिवळा",ss:"तपकिरी / काळे ठिपके",sw:"पांढरी भुकटी",
+      acc:"रंगावर आधारित डेमो अंदाज"}
+};
+
+const NAMES = {
+  healthy:{en:"Healthy leaf",hi:"स्वस्थ पत्ती",mr:"निरोगी पान"},
+  spot:{en:"Leaf spot (early blight type)",hi:"पत्ती धब्बा रोग (अर्ली ब्लाइट जैसा)",mr:"पानांवरील ठिपके (अर्ली ब्लाइट प्रकार)"},
+  yellow:{en:"Yellowing (nutrient stress or virus)",hi:"पत्तियों का पीलापन (पोषक तत्व की कमी या वायरस)",mr:"पाने पिवळी पडणे (अन्नद्रव्य कमतरता किंवा विषाणू)"},
+  mildew:{en:"Powdery mildew",hi:"चूर्णिल आसिता (पाउडरी मिल्ड्यू)",mr:"भुरी रोग"}
+};
+
+const KB = {
+  healthy:{
+    sym:{en:["Even green colour","No spots, powder or curling"],
+         hi:["एक समान हरा रंग","कोई धब्बा, पाउडर या मुड़ाव नहीं"],
+         mr:["एकसारखा हिरवा रंग","ठिपके, भुकटी किंवा गुंडाळी नाही"]},
+    cure:{en:["No treatment needed","Keep checking leaves every few days","Water at the base, not over the leaves"],
+          hi:["इलाज की ज़रूरत नहीं","हर कुछ दिन में पत्तियाँ देखते रहें","पानी जड़ में दें, पत्तियों पर नहीं"],
+          mr:["उपचाराची गरज नाही","दर काही दिवसांनी पाने तपासत रहा","पाणी पानांवर नव्हे, मुळाजवळ द्या"]}},
+  spot:{
+    sym:{en:["Brown spots, often with a dark ring","Spots grow and join together","Older leaves are hit first"],
+         hi:["भूरे धब्बे, अक्सर गहरे घेरे के साथ","धब्बे बढ़कर आपस में जुड़ते हैं","पुरानी पत्तियाँ पहले प्रभावित होती हैं"],
+         mr:["तपकिरी ठिपके, अनेकदा गडद कडेसह","ठिपके वाढून एकमेकांत मिसळतात","जुनी पाने आधी बाधित होतात"]},
+    cure:{en:["Pick off badly spotted leaves and burn or bin them","Avoid watering over the leaves","Spray a fungicide such as mancozeb or copper oxychloride, following the label dose"],
+          hi:["ज़्यादा धब्बे वाली पत्तियाँ तोड़कर जला दें या फेंक दें","पत्तियों पर पानी न डालें","मैन्कोज़ेब या कॉपर ऑक्सीक्लोराइड जैसी फफूंदनाशक दवा लेबल की मात्रा में छिड़कें"],
+          mr:["खूप ठिपके असलेली पाने तोडून जाळा किंवा फेकून द्या","पानांवर पाणी देणे टाळा","मॅन्कोझेब किंवा कॉपर ऑक्सिक्लोराइड सारखे बुरशीनाशक लेबलवरील मात्रेत फवारा"]}},
+  yellow:{
+    sym:{en:["Pale or yellow patches between veins","Leaves may curl or stay small","Growth slows"],
+         hi:["नसों के बीच हल्के या पीले धब्बे","पत्तियाँ मुड़ सकती हैं या छोटी रह सकती हैं","बढ़त धीमी हो जाती है"],
+         mr:["शिरांच्या मध्ये फिकट किंवा पिवळे डाग","पाने गुंडाळू शकतात किंवा लहान राहतात","वाढ मंदावते"]},
+    cure:{en:["Check drainage; soggy soil causes yellowing too","Look for whiteflies and aphids, which spread viruses","Pull out plants that look badly virus-hit so it does not spread","Ask your local expert about a soil test for nitrogen or iron"],
+          hi:["पानी निकासी देखें; गीली मिट्टी से भी पीलापन आता है","सफेद मक्खी और माहू देखें, ये वायरस फैलाते हैं","वायरस से बुरी तरह प्रभावित पौधे उखाड़ दें ताकि फैले नहीं","नाइट्रोजन या आयरन के लिए मिट्टी जाँच के बारे में स्थानीय विशेषज्ञ से पूछें"],
+          mr:["निचरा तपासा; पाणथळ जमिनीमुळेही पाने पिवळी पडतात","पांढरी माशी आणि मावा तपासा, ते विषाणू पसरवतात","विषाणूने खूप बाधित झाडे उपटून टाका म्हणजे प्रसार होणार नाही","नत्र किंवा लोहासाठी माती तपासणीबद्दल स्थानिक तज्ञांना विचारा"]}},
+  mildew:{
+    sym:{en:["White or grey powder on the leaf surface","Leaves may twist and dry out","Common in dry days with humid nights"],
+         hi:["पत्ती की सतह पर सफेद या धूसर पाउडर","पत्तियाँ मुड़कर सूख सकती हैं","दिन सूखे और रातें नम हों तो आम"],
+         mr:["पानाच्या पृष्ठभागावर पांढरी किंवा राखाडी भुकटी","पाने वळून वाळू शकतात","कोरडे दिवस आणि दमट रात्री असल्यास सामान्य"]},
+    cure:{en:["Space plants so air can move between them","Spray a sulphur-based fungicide, following the label dose","Avoid too much nitrogen fertiliser"],
+          hi:["पौधों के बीच दूरी रखें ताकि हवा चले","गंधक आधारित फफूंदनाशक लेबल की मात्रा में छिड़कें","नाइट्रोजन खाद ज़्यादा न दें"],
+          mr:["झाडांमध्ये अंतर ठेवा म्हणजे हवा खेळती राहील","गंधकयुक्त बुरशीनाशक लेबलवरील मात्रेत फवारा","नत्रयुक्त खत जास्त देऊ नका"]}}
+};
+
+let lang = "en", current = null, currentSample = -1;
+const $ = id => document.getElementById(id);
+
+/* ---------- sample leaves drawn on canvas ---------- */
+function drawLeaf(c, kind){
+  const g = c.getContext("2d"), W = c.width, H = c.height;
+  let seed = {healthy:3,spot:7,yellow:11,mildew:19,none:1}[kind];
+  const rnd = () => (seed = (seed*16807) % 2147483647) / 2147483647;
+  g.fillStyle = "#26323a"; g.fillRect(0,0,W,H);
+  if(kind === "none"){
+    g.fillStyle = "#3d5a80"; g.fillRect(W*.15,H*.3,W*.7,H*.4);
+    g.fillStyle = "#98c1d9"; g.beginPath(); g.arc(W*.5,H*.5,W*.12,0,7); g.fill();
+    return;
+  }
+  g.save(); g.translate(W/2,H/2); g.rotate(-.5);
+  const rx = W*.34, ry = H*.2;
+  const base = {healthy:["#3f9a47","#2a7a35"],spot:["#4a9440","#2f7231"],yellow:["#c9c04a","#7fa63a"],mildew:["#4c9a48","#2f7a38"]}[kind];
+  const grad = g.createLinearGradient(-rx,0,rx,0); grad.addColorStop(0,base[0]); grad.addColorStop(1,base[1]);
+  g.beginPath(); g.ellipse(0,0,rx,ry,0,0,7); g.fillStyle = grad; g.fill();
+  g.clip();
+  const dots = (n,fn)=>{for(let i=0;i<n;i++){const a=rnd()*6.283,r=Math.sqrt(rnd());fn(Math.cos(a)*r*rx*.9,Math.sin(a)*r*ry*.85,rnd());}};
+  if(kind==="spot") dots(26,(x,y,t)=>{const s=5+t*9;
+    g.fillStyle="#3a2412";g.beginPath();g.arc(x,y,s+2,0,7);g.fill();
+    g.fillStyle="#8a5526";g.beginPath();g.arc(x,y,s,0,7);g.fill();});
+  if(kind==="yellow") dots(9,(x,y,t)=>{g.fillStyle="rgba(235,215,40,.9)";g.beginPath();g.ellipse(x,y,18+t*22,12+t*14,t*3,0,7);g.fill();});
+  if(kind==="mildew") dots(28,(x,y,t)=>{g.fillStyle="rgba(240,240,236,.88)";g.beginPath();g.ellipse(x,y,14+t*20,9+t*12,t*3,0,7);g.fill();});
+  g.restore();
+  g.save(); g.translate(W/2,H/2); g.rotate(-.5);
+  g.strokeStyle = "rgba(20,60,25,.55)"; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(-rx,0); g.lineTo(rx,0); g.stroke();
+  g.lineWidth = 1.5;
+  for(let i=-3;i<=3;i++){ if(!i) continue; const x=i*rx/4.2;
+    g.beginPath(); g.moveTo(x,0); g.lineTo(x+rx*.12,-ry*.8); g.moveTo(x,0); g.lineTo(x+rx*.12,ry*.8); g.stroke(); }
+  g.restore();
+}
+
+const SAMPLES = [["healthy",{en:"Healthy",hi:"स्वस्थ",mr:"निरोगी"}],["spot",{en:"Spotted",hi:"धब्बे",mr:"ठिपके"}],
+  ["yellow",{en:"Yellow",hi:"पीली",mr:"पिवळी"}],["mildew",{en:"Powdery",hi:"पाउडर",mr:"भुकटी"}],["none",{en:"Not a leaf",hi:"पत्ती नहीं",mr:"पान नाही"}]];
+
+function buildSamples(){
+  const box = $("samples");
+  SAMPLES.forEach(([k,names],i)=>{
+    const b = document.createElement("button");
+    b.setAttribute("aria-pressed","false"); b.dataset.i = i; b.title = names.en;
+    const c = document.createElement("canvas"); c.width = c.height = 160; drawLeaf(c,k);
+    b.appendChild(c); box.appendChild(b);
+    b.onclick = () => { currentSample = i; mark(); const v = $("view"); drawLeaf(v,k); v.__r = null; current = v; render(); };
+  });
+}
+function mark(){ document.querySelectorAll("#samples button").forEach((b,i)=>b.setAttribute("aria-pressed", i===currentSample)); }
+
+/* ---------- analysis: real pixel stats ---------- */
+function hsv(r,g,b){
+  r/=255;g/=255;b/=255; const mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn; let h=0;
+  if(d){ if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h*=60; if(h<0) h+=360; }
+  return [h, mx?d/mx:0, mx];
+}
+function analyse(src){
+  const N = 64, t = document.createElement("canvas"); t.width = t.height = N;
+  const g = t.getContext("2d"); g.drawImage(src,0,0,N,N);
+  const px = g.getImageData(0,0,N,N).data;
+  let n=0, green=0, yel=0, spot=0, white=0, total=0;
+  for(let y=0;y<N;y++) for(let x=0;x<N;x++){
+    const dx=(x-N/2)/(N*.45), dy=(y-N/2)/(N*.45); if(dx*dx+dy*dy>1) continue; // centre ellipse only
+    total++; const i=(y*N+x)*4; const [h,s,v]=hsv(px[i],px[i+1],px[i+2]);
+    if(v<.2) {spot++;n++;}
+    else if(s<.18&&v>.72){white++;n++;}
+    else if(h>=70&&h<=165&&s>.25){green++;n++;}
+    else if(h>=40&&h<70&&s>.35&&v>.45){yel++;n++;}
+    else if(h>=8&&h<40&&s>.3&&v<.7){spot++;n++;}
+  }
+  if(n/total < .12) return {noleaf:true};
+  const f = {green:green/n, yel:yel/n, spot:spot/n, white:white/n};
+  const hurt = Math.min(1, f.spot*5 + f.yel*2.2 + f.white*3);
+  const raw = {
+    healthy: Math.max(.05, f.green*(1-hurt)),
+    spot: Math.max(.05, Math.min(1,f.spot*6)),
+    yellow: Math.max(.05, Math.min(1,f.yel*2.6)),
+    mildew: Math.max(.05, Math.min(1,f.white*4))
+  };
+  const sq = Object.fromEntries(Object.entries(raw).map(([k,v])=>[k,v*v]));
+  const sum = Object.values(sq).reduce((a,b)=>a+b,0);
+  const top = Object.entries(sq).map(([k,v])=>[k,v/sum]).sort((a,b)=>b[1]-a[1]);
+  return {top, f};
+}
+
+/* ---------- render ---------- */
+const li = a => "<ul>" + a.map(s=>`<li>${s}</li>`).join("") + "</ul>";
+function render(){
+  const t = UI[lang], el = $("result");
+  if(!current){ el.innerHTML = `<p class="empty">${t.empty}</p>`; return; }
+  const r = current.__r;
+  if(!r){ el.innerHTML = `<p class="empty">${t.empty}</p>`; return; }
+  const expert = `<div style="margin-top:8px"><b>📞 ${t.contact}:</b><br>${t.expert}</div>`;
+  if(r.noleaf){ el.innerHTML = `<div class="card warn"><b>🍃 ${t.noleaf}</b></div>`; return; }
+  const [key,p] = r.top[0], pct = Math.round(p*100);
+  const others = r.top.slice(1,3).map(([k,q])=>`${NAMES[k][lang]} (${Math.round(q*100)}%)`).join(", ");
+  let h = "";
+  if(pct < CONF_THRESHOLD){
+    h += `<div class="card warn"><b style="font-size:19px">⚠️ ${t.unsure.replace("{p}",pct)}</b><br>${t.tip}${expert}</div>`;
+    h += `<p class="small"><b>${t.other}:</b> ${NAMES[key][lang]} (${pct}%), ${others}</p>`;
+  } else {
+    h += `<div class="card ok"><div class="small">${t.likely}</div><div class="dx">${NAMES[key][lang]}</div>
+      <div class="small" style="margin-top:8px">${t.sure}: <b>${pct}%</b></div>
+      <div class="bar"><i style="width:0" data-w="${pct}"></i></div>
+      <div class="small" style="margin-top:6px">${t.acc}</div></div>`;
+    h += `<div class="card"><b>🔍 ${t.sym}</b>${li(KB[key].sym[lang])}</div>`;
+    h += `<div class="card"><b>💊 ${t.cure}</b>${li(KB[key].cure[lang])}</div>`;
+    h += `<p class="small"><b>${t.other}:</b> ${others}</p>`;
+  }
+  h += `<div class="card note">${t.warn}</div>`;
+  const f = r.f;
+  h += `<details><summary>${t.sig}</summary><div class="sig">
+    <span>${t.sg}</span><div class="bar"><i data-w="${Math.round(f.green*100)}"></i></div><span>${Math.round(f.green*100)}%</span>
+    <span>${t.sy}</span><div class="bar"><i data-w="${Math.round(f.yel*100)}"></i></div><span>${Math.round(f.yel*100)}%</span>
+    <span>${t.ss}</span><div class="bar"><i data-w="${Math.round(f.spot*100)}"></i></div><span>${Math.round(f.spot*100)}%</span>
+    <span>${t.sw}</span><div class="bar"><i data-w="${Math.round(f.white*100)}"></i></div><span>${Math.round(f.white*100)}%</span></div></details>`;
+  el.innerHTML = h;
+  requestAnimationFrame(()=>el.querySelectorAll("i[data-w]").forEach(i=>i.style.width = i.dataset.w+"%"));
+  if($("speak").checked && pct >= CONF_THRESHOLD) say(NAMES[key][lang] + ". " + KB[key].cure[lang].join(". "));
+}
+function say(text){
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text); u.lang = {en:"en-IN",hi:"hi-IN",mr:"mr-IN"}[lang];
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+function labels(){
+  const t = UI[lang];
+  $("sub").textContent = t.sub; $("banner").textContent = t.banner; $("h-pick").textContent = t.pick;
+  $("hint").textContent = t.hint; $("up").textContent = t.up; $("speaklbl").textContent = t.speak;
+  $("go").textContent = t.btn; $("h-res").textContent = t.res;
+  document.documentElement.lang = lang;
+}
+
+/* ---------- events ---------- */
+document.querySelectorAll(".langs button").forEach(b=>b.onclick=()=>{
+  lang = b.dataset.l;
+  document.querySelectorAll(".langs button").forEach(x=>x.setAttribute("aria-pressed", x===b));
+  labels(); if(current && current.__r) render(); else $("result").innerHTML = `<p class="empty">${UI[lang].empty}</p>`;
+});
+$("go").onclick = () => {
+  if(!current){ $("result").innerHTML = `<div class="card warn"><b>${UI[lang].noimg}</b></div>`; return; }
+  current.__r = analyse(current); render();
+};
+$("file").onchange = e => {
+  const f = e.target.files[0]; if(!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const v = $("view"), g = v.getContext("2d"); g.fillStyle="#26323a"; g.fillRect(0,0,v.width,v.height);
+    const s = Math.min(v.width/img.width, v.height/img.height), w = img.width*s, h = img.height*s;
+    g.drawImage(img,(v.width-w)/2,(v.height-h)/2,w,h);
+    v.__r = null; current = v; currentSample = -1; mark(); render(); URL.revokeObjectURL(img.src);
+  };
+  img.src = URL.createObjectURL(f);
+};
+
+buildSamples(); labels(); render();
+</script>
+</body>
+</html>
